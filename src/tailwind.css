@@ -1,0 +1,40 @@
+/* src/tailwind.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Styles */
+#root {
+  @apply max-w-container mx-auto p-standard text-center bg-primary-color text-text-primary;
+}
+
+.logo {
+  @apply h-24 p-6 bg-secondary-color rounded-full relative transition-filter duration-300;
+  will-change: filter;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 2em theme('colors.shadow-primary'));
+}
+
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em theme('colors.shadow-secondary'));
+}
+
+.card {
+  @apply p-standard bg-tertiary-color rounded-lg shadow-xl;
+  box-shadow: 0 0 1em theme('colors.shadow-primary');
+}
+
+.read-the-docs {
+  @apply text-text-secondary;
+}
+
+.pacman {
+  @apply w-8 h-8 bg-secondary-color rounded-full relative animate-pacman-move;
+}
+
+.data {
+  @apply w-4 h-4 bg-tertiary-color rounded-full absolute animate-data-move;
+}
