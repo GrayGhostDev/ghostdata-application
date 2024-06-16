@@ -12,18 +12,20 @@
     "lint": "npm --prefix frontend run lint && npm --prefix backend run lint"
   },
   "dependencies": {
-    "vite": "^5.2.13",
+    "@usedapp/core": "^1.2.16",
+    "axios": "^1.7.2",
     "dotenv": "^16.4.5",
-    "axios": "^1.7.2"
+    "ethers": "^6.13.0",
+    "vite": "^5.2.13"
   },
   "devDependencies": {
     "@types/node": "^20.14.2",
-    "typescript": "^5.4.5",
-    "eslint": "^9.4.0",
-    "prettier": "^3.3.2",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
-    "eslint-config-prettier": "^9.1.0"
+    "eslint": "^9.4.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5"
   },
   "workspaces": [
     "./src/frontend",
