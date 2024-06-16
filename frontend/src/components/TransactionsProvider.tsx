@@ -7,7 +7,7 @@ import React, {
   ReactNode,
 } from "react";
 import { ethers, Contract } from "ethers";
-import { useSigner, useAccounts } from "@thirdweb-dev/react";
+import { useSigner } from "@thirdweb-dev/react";
 import { contractABI, contractAddress } from "@/utils/constants";
 
 enum TransactionType {

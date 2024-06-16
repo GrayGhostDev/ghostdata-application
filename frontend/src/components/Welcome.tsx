@@ -10,7 +10,6 @@ import AssetTransferForm from "./AssetTransferForm";
 import shortenAddress from "../utils/shortenAddress";
 import Loader from "./Loader";
 
-
 interface InputProps {
   placeholder: string;
   name: string;
@@ -121,7 +120,7 @@ const Welcome: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
+          <form onSubmit={handleSubmit} className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
             <Input
               placeholder="Address To"
               name="addressTo"
@@ -163,7 +162,7 @@ const Welcome: React.FC = () => {
                 Send now
               </button>
             )}
-          </div>
+          </form>
         </div>
       </div>
     </div>

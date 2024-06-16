@@ -15,7 +15,6 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@usedapp/core": "^1.1.5",
     "@chakra-ui/react": "^2.8.2",
     "@ethersproject/abstract-provider": "^5.7.0",
     "@ethersproject/providers": "^5.7.2",
@@ -25,6 +24,8 @@
     "@tailwindcss/typography": "^0.5.13",
     "@thirdweb-dev/chains": "^0.1.118",
     "@thirdweb-dev/react": "^4.7.0",
+    "@thirdweb-dev/tsconfig": "^0.1.7",
+    "@usedapp/core": "^1.1.5",
     "browserify": "^17.0.0",
     "browserify-zlib": "^0.2.0",
     "clean-webpack-plugin": "^4.0.0",
@@ -114,8 +115,8 @@
       "plugin:react-hooks/recommended"
     ],
     "resolutions": {
-    "react-error-overlay": "^6.0.9"
-  },
+      "react-error-overlay": "^6.0.9"
+    },
     "settings": {
       "react": {
         "version": "detect"
