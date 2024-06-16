@@ -9,7 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  mode: process.env.NODE_ENV || 'development', // Use development mode by default
+  mode: process.env.NODE_ENV || 'development',
   entry: './src/main.tsx',
   output: {
     filename: 'main.[contenthash].js',
@@ -32,7 +32,7 @@ export default {
     rules: [
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
+        use: 'babel-loader',
         exclude: /node_modules/,
       },
       {
@@ -66,10 +66,10 @@ export default {
     static: {
       directory: path.join(__dirname, 'dist'),
     },
-    port: 5173, // Use the same port
+    port: 5173,
     hot: true,
     historyApiFallback: true,
-    open: true, // Automatically open the browser
+    open: true,
   },
-  devtool: 'source-map', // Enable source maps for development
+  devtool: 'source-map',
 };

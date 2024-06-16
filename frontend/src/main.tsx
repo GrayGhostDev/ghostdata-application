@@ -1,18 +1,17 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import { ThirdwebProvider } from "@thirdweb-dev/react";
-import { ZMainnet, Rinkeby } from "@thirdweb-dev/chains";
-import App from "./App";
-import { TransactionsProvider } from "./hooks/useTransactions";
-import ToastConfig from "./ToastConfig";
-import "./styles/tailwind.css";
-import "./styles/index.css";
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { ThirdwebProvider } from '@thirdweb-dev/react';
+import { Mainnet, Rinkeby } from '@thirdweb-dev/chains';
+import App from './App';
+import { TransactionsProvider } from './hooks/useTransactions';
+import ToastConfig from './ToastConfig';
+import './styles/tailwind.css';
+import './styles/index.css';
 
-const supportedChains = [ZMainnet, Rinkeby];
+const supportedChains = [Mainnet, Rinkeby];
+const ACTIVE_CHAIN = Mainnet;
 
-const ACTIVE_CHAIN = ZMainnet;
-
-const rootElement = document.getElementById("root");
+const rootElement = document.getElementById('root');
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
