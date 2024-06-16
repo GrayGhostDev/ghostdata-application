@@ -1,29 +1,35 @@
 // src/components/WalletConnect.tsx
 import React from "react";
-import { useConnect, useAccount } from "@thirdweb-dev/react";
-import { Web3Button } from "@thirdweb-dev/react";
-import { contractAddress, ACTIVE_CHAIN_ID } from "../utils/constants";
+import {
+  useConnect,
+  ConnectWallet,
+  Web3Button,
+  useContract,
+  useAddress,
+} from "@thirdweb-dev/react";
+import { contractAddress } from "@/utils/constants";
 
 const WalletConnect: React.FC = () => {
-  const address = useAccount()?.address;
+  const address = useAddress();
   const connect = useConnect();
+  const { contract } = useContract(contractAddress);
 
   return (
     <div>
       {!address ? (
         // Connect Wallet Button
-        <ConnectWallet accentColor="#F213A4" colorMode="dark" />
+        <ConnectWallet />
       ) : (
         <p>Connected Wallet: {address}</p>
       )}
 
       {/* Web3Button for interacting with the contract (Optional) */}
-      {address && (
+      {address && contract && (
         <Web3Button
           contractAddress={contractAddress}
-          action={(contract) =>
+          action={async (contract) =>
             // Replace with the actual function you want to call
-            contract.call("yourContractFunction", ["arg1", "arg2"])
+            await contract.call("yourContractFunction", ["arg1", "arg2"])
           }
         >
           Interact with Contract

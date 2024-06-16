@@ -2,7 +2,7 @@
 import React, { useState, FormEvent } from "react";
 import { useContract, useSigner } from "@thirdweb-dev/react";
 import { ConnectWallet } from "@thirdweb-dev/react";
-import { contractABI, contractAddress } from "../utils/constants";
+import { contractABI, contractAddress } from "@/utils/constants";
 
 interface TransferDetails {
   recipient: string;
@@ -10,9 +10,12 @@ interface TransferDetails {
 }
 
 const AssetTransferForm: React.FC = () => {
-  const [transferDetails, setTransferDetails] = useState<TransferDetails>({ recipient: "", tokenId: "" });
+  const [transferDetails, setTransferDetails] = useState<TransferDetails>({
+    recipient: "",
+    tokenId: "",
+  });
   const { contract } = useContract(contractAddress, contractABI);
-  const { data: signer } = useSigner();
+  const signer = useSigner();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -21,7 +24,10 @@ const AssetTransferForm: React.FC = () => {
 
     try {
       // Assuming the contract has a method like 'transferAsset'
-      const tx = await contract.call("transferAsset", [transferDetails.recipient, transferDetails.tokenId]);
+      const tx = await contract.call("transferAsset", [
+        transferDetails.recipient,
+        transferDetails.tokenId,
+      ]);
       const receipt = await tx.wait();
       console.log(receipt);
     } catch (error) {
@@ -39,7 +45,10 @@ const AssetTransferForm: React.FC = () => {
           placeholder="Recipient Address"
           value={transferDetails.recipient}
           onChange={(e) =>
-            setTransferDetails({ ...transferDetails, recipient: e.target.value })
+            setTransferDetails({
+              ...transferDetails,
+              recipient: e.target.value,
+            })
           }
         />
         <input
@@ -50,9 +59,7 @@ const AssetTransferForm: React.FC = () => {
             setTransferDetails({ ...transferDetails, tokenId: e.target.value })
           }
         />
-        <button type="submit">
-          Transfer Asset
-        </button>
+        <button type="submit">Transfer Asset</button>
       </form>
     </div>
   );

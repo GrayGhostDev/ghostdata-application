@@ -1,22 +1,45 @@
-import React, { useState, useContext, FormEvent } from "react";
+// /frontend/src/components/Welcome.tsx
+
+import React, { useState, FormEvent } from "react";
 import { AiFillPlayCircle } from "react-icons/ai";
 import { SiEthereum } from "react-icons/si";
 import { BsInfoCircle } from "react-icons/bs";
-import { useAddress, useConnect } from "@thirdweb-dev/react";
+import { useTransactions } from "@/hooks/useTransactions";
 import LoanDiskForm from "./LoanDiskForm";
 import AssetTransferForm from "./AssetTransferForm";
-import { TransactionsContextType, TransactionContext } from "../context/TransactionsContext.tsx";
-import { shortenAddress } from "../utils/shortenAddress";
+import shortenAddress from "../utils/shortenAddress";
 import Loader from "./Loader";
-import Input from "./Input";
-import { ethers } from "ethers";
-import { contractAddress, contractABI } from "../utils/constants";
 
+
+interface InputProps {
+  placeholder: string;
+  name: string;
+  type: string;
+  value: string | number;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+// Input component
+const Input: React.FC<InputProps> = ({
+  placeholder,
+  name,
+  type,
+  value,
+  handleChange,
+}) => (
+  <input
+    placeholder={placeholder}
+    name={name}
+    type={type}
+    value={value}
+    onChange={handleChange}
+    className="my-2 w-full rounded-sm p-2 outline-none bg-transparent text-white border-none text-sm white-glassmorphism"
+  />
+);
 
 const Welcome: React.FC = () => {
-  const { connectWallet, currentAccount, isLoading, addEthTransaction } = useContext(TransactionContext) as TransactionsContextType;
-  const { connect, isConnecting } = useConnect();
-  const address = useAddress();
+  const { connectWallet, currentAccount, isLoading, recordTransaction } =
+    useTransactions();
 
   const [formData, setFormData] = useState({
     addressTo: "",
@@ -35,26 +58,13 @@ const Welcome: React.FC = () => {
     if (!addressTo || !amount || !keyword || !message) return;
 
     try {
-      if (!currentAccount) throw new Error("Wallet not connected");
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const signer = provider.getSigner();
-      const contract = new ethers.Contract(contractAddress, contractABI, signer);
-
-      const transaction = await contract.recordTransaction(
-        ethers.utils.parseEther(amount),
-        addressTo,
-        message
-      );
-
+      await recordTransaction(amount, addressTo, message);
       setFormData({
         addressTo: "",
         amount: "",
         keyword: "",
         message: "",
       });
-
-      const receipt = await transaction.wait();
-      addEthTransaction(receipt);
       alert("Transaction successful!");
     } catch (error) {
       console.error("Transaction failed:", error);
@@ -70,18 +80,18 @@ const Welcome: React.FC = () => {
             Send Crypto <br /> across the world
           </h1>
           <p className="text-left mt-5 text-white font-light md:w-9/12 w-11/12 text-base">
-            Explore the crypto world. Buy and sell cryptocurrencies easily on Gray Ghost.
+            Explore the crypto world. Buy and sell cryptocurrencies easily on
+            Gray Ghost.
           </p>
           {!currentAccount && (
             <button
               type="button"
               onClick={connectWallet}
-              disabled={isConnecting}
               className="flex flex-row justify-center items-center my-5 bg-[#2952e3] p-3 rounded-full cursor-pointer hover:bg-[#2546bd]"
             >
               <AiFillPlayCircle className="text-white mr-2" />
               <p className="text-white text-base font-semibold">
-                {isConnecting ? 'Connecting...' : 'Connect Wallet'}
+                Connect Wallet
               </p>
             </button>
           )}
@@ -112,17 +122,42 @@ const Welcome: React.FC = () => {
             </div>
           </div>
           <div className="p-5 sm:w-96 w-full flex flex-col justify-start items-center blue-glassmorphism">
-            <Input placeholder="Address To" name="addressTo" type="text" value={formData.addressTo} handleChange={handleChange} />
-            <Input placeholder="Amount (ETH)" name="amount" type="number" value={formData.amount} handleChange={handleChange} />
-            <Input placeholder="Keyword (Gif)" name="keyword" type="text" value={formData.keyword} handleChange={handleChange} />
-            <Input placeholder="Enter Message" name="message" type="text" value={formData.message} handleChange={handleChange} />
+            <Input
+              placeholder="Address To"
+              name="addressTo"
+              type="text"
+              value={formData.addressTo}
+              handleChange={handleChange}
+            />
+            <Input
+              placeholder="Amount (ETH)"
+              name="amount"
+              type="number"
+              value={formData.amount}
+              handleChange={handleChange}
+            />
+            <Input
+              placeholder="Keyword (Gif)"
+              name="keyword"
+              type="text"
+              value={formData.keyword}
+              handleChange={handleChange}
+            />
+            <Input
+              placeholder="Enter Message"
+              name="message"
+              type="text"
+              value={formData.message}
+              handleChange={handleChange}
+            />
 
             <div className="h-[1px] w-full bg-gray-400 my-2" />
 
-            {isLoading ? <Loader /> : (
+            {isLoading ? (
+              <Loader />
+            ) : (
               <button
-                type="button"
-                onClick={handleSubmit}
+                type="submit"
                 className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-[#3d4f7c] rounded-full cursor-pointer"
               >
                 Send now
@@ -131,7 +166,6 @@ const Welcome: React.FC = () => {
           </div>
         </div>
       </div>
-      <Services /> {/* Integrate Services component */}
     </div>
   );
 };

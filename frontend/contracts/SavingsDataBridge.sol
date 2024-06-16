@@ -39,14 +39,12 @@ contract SavingsDataBridge is ChainlinkClient, Ownable {
         fee = _fee;
     }
 
-    // Function to deposit savings (user-initiated)
     function depositSavings(uint256 amount) external {
         require(amount > 0, "Amount must be greater than zero");
         savingsAccounts[msg.sender].balance += amount;
         emit SavingsDeposit(msg.sender, amount);
     }
 
-    // Function to withdraw savings (user-initiated)
     function withdrawSavings(uint256 amount) external {
         require(amount > 0, "Amount must be greater than zero");
         require(savingsAccounts[msg.sender].balance >= amount, "Insufficient balance");
@@ -54,7 +52,6 @@ contract SavingsDataBridge is ChainlinkClient, Ownable {
         emit SavingsWithdrawal(msg.sender, amount);
     }
 
-    // Function to initiate ETH withdrawal (user-initiated)
     function requestEthWithdrawal(uint256 loanDiskSavingsId) external {
         Chainlink.Request memory req = buildChainlinkRequest(jobId, address(this), this.fulfillEthWithdrawal.selector);
         req.addUint("savingsId", loanDiskSavingsId);
@@ -62,18 +59,16 @@ contract SavingsDataBridge is ChainlinkClient, Ownable {
         emit ChainlinkRequested(requestId);
     }
 
-    // Callback function for Chainlink oracle (oracle-initiated)
     function fulfillEthWithdrawal(bytes32 _requestId, uint256 amount) external recordChainlinkFulfillment(_requestId) {
         require(amount > 0, "Amount must be greater than zero");
-        address user = tx.origin; // Assuming the oracle sends the request on behalf of the user
+        address user = tx.origin;
         require(savingsAccounts[user].balance >= amount, "Insufficient balance");
         savingsAccounts[user].balance -= amount;
-        payable(user).transfer(amount); // Transfer ETH to the user
+        payable(user).transfer(amount);
         emit EthWithdrawal(user, amount);
         emit ChainlinkFulfilled(_requestId, amount);
     }
 
-    // Helper function to convert string to bytes32
     function stringToBytes32(string memory source) internal pure returns (bytes32 result) {
         bytes memory tempEmptyStringTest = bytes(source);
         if (tempEmptyStringTest.length == 0) {
@@ -85,6 +80,5 @@ contract SavingsDataBridge is ChainlinkClient, Ownable {
         }
     }
 
-    // Function to allow the contract to receive ETH
     receive() external payable {}
 }

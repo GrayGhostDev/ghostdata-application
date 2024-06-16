@@ -2,7 +2,7 @@
 import React, { useState, FormEvent } from "react";
 import { useContract, useSigner } from "@thirdweb-dev/react";
 import { ConnectWallet } from "@thirdweb-dev/react";
-import { contractABI, contractAddress } from "../utils/constants";
+import { contractABI, contractAddress } from "@/utils/constants";
 
 interface AssetDetails {
   name: string;
@@ -10,18 +10,24 @@ interface AssetDetails {
 }
 
 const AssetTokenization: React.FC = () => {
-  const [assetDetails, setAssetDetails] = useState<AssetDetails>({ name: "", description: "" });
+  const [assetDetails, setAssetDetails] = useState<AssetDetails>({
+    name: "",
+    description: "",
+  });
   const { contract } = useContract(contractAddress, contractABI);
-  const { data: signer } = useSigner();
+  const signer= useSigner();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!contract || !signer) return; // Check if contract and signer are defined
+    if (!contract || !signer) return; // Check contract and signer are defined
 
     try {
       // Assuming the contract has a method like 'tokenizeAsset'
-      const tx = await contract.call("tokenizeAsset", [assetDetails.name, assetDetails.description]);
+      const tx = await contract.call("tokenizeAsset", [
+        assetDetails.name,
+        assetDetails.description,
+      ]);
       const receipt = await tx.wait();
       console.log(receipt);
     } catch (error) {
@@ -50,9 +56,7 @@ const AssetTokenization: React.FC = () => {
             setAssetDetails({ ...assetDetails, description: e.target.value })
           }
         />
-        <button type="submit">
-          Tokenize Asset
-        </button>
+        <button type="submit">Tokenize Asset</button>
       </form>
     </div>
   );

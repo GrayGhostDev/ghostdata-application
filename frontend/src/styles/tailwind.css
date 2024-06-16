@@ -1,13 +1,65 @@
-/* src/tailwind.css */
-
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
 
 /* Custom Styles */
-#root {
-  @apply max-w-container mx-auto p-standard text-center bg-primary-color text-text-primary;
+@layer utilities {
+  .max-w-container {
+    max-width: 1200px; /* Or your desired width */
+  }
+  
+  .bg-secondary-color {
+    background-color: theme('colors.secondary-color');
+  }
+
+  .bg-tertiary-color {
+    background-color: theme('colors.tertiary-color');
+  }
+
+  .text-text-primary {
+    color: theme('colors.text-primary');
+  }
+
+  .text-text-secondary {
+    color: theme('colors.text-secondary');
+  }
+
+  .shadow-primary {
+    box-shadow: 0 0 1em theme('colors.shadow-primary');
+  }
+
+  .shadow-secondary {
+    box-shadow: 0 0 1em theme('colors.shadow-secondary');
+  }
+
+  .p-standard {
+    padding: theme('spacing.standard');
+  }
+
+  /* Define the transition for filter property */
+  .transition-filter {
+    transition-property: filter;
+    transition-duration: 0.3s;
+  }
+
+  /* Custom filters */
+  .filter-brightness {
+    filter: brightness(1.2);
+  }
+
+  .filter-contrast {
+    filter: contrast(1.1);
+  }
+
+  .filter-grayscale {
+    filter: grayscale(0.5);
+  }
+
+  .filter-sepia {
+    filter: sepia(0.5);
+  }
 }
+
+@tailwind utilities;
 
 .logo {
   @apply h-24 p-6 bg-secondary-color rounded-full relative transition-filter duration-300;
@@ -15,16 +67,15 @@
 }
 
 .logo:hover {
-  filter: drop-shadow(0 0 2em theme("colors.shadow-primary"));
+  filter: drop-shadow(0 0 2em theme("colors.shadow-primary")) brightness(1.2);
 }
 
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em theme("colors.shadow-secondary"));
+  filter: drop-shadow(0 0 2em theme("colors.shadow-secondary")) contrast(1.1);
 }
 
 .card {
-  @apply p-standard bg-tertiary-color rounded-lg shadow-xl;
-  box-shadow: 0 0 1em theme("colors.shadow-primary");
+  @apply p-standard bg-tertiary-color rounded-lg shadow-xl filter-grayscale;
 }
 
 .read-the-docs {
@@ -32,9 +83,9 @@
 }
 
 .pacman {
-  @apply w-8 h-8 bg-secondary-color rounded-full relative animate-pacman-move;
+  @apply w-8 h-8 bg-secondary-color rounded-full relative animate-pacman-move filter-sepia;
 }
 
 .data {
-  @apply w-4 h-4 bg-tertiary-color rounded-full absolute animate-data-move;
+  @apply w-4 h-4 bg-tertiary-color rounded-full absolute animate-data-move filter-brightness;
 }

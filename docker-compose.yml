@@ -1,0 +1,47 @@
+# Core Docker Compose configuration for the GhostData application
+services:
+  frontend:
+    build:
+      context: ./frontend  # Adjusted path to the frontend code
+      dockerfile: Dockerfile  # Ensure this Dockerfile is correctly named and located in the frontend directory
+    ports:
+      - "5173:5173"  # Expose port from container to host
+    depends_on:
+      - server  # Ensure the backend starts before the frontend
+    networks:
+      - app-network
+
+  server:
+    build:
+      context: ./server  # Adjusted path to the backend code
+      dockerfile: Dockerfile  # Ensure this Dockerfile is correctly named and located in the backend directory
+    ports:
+      - "8988:8080"  # Expose port 8080 from container to host
+    environment:
+      - LOANDISK_API_KEY=${LOANDISK_API_KEY}
+      - LOANDISK_API_ENDPOINT=${LOANDISK_API_ENDPOINT}
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}  # Database connection string
+    depends_on:
+      - db  # Ensure the database starts before the backend
+    networks:
+      - app-network
+
+  db:
+    image: postgres:14-alpine  # Use the PostgreSQL image
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}  # Environment variable reference
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}  # Set a strong password in production
+      - POSTGRES_DB=${POSTGRES_DB}  # Database name for your project
+    ports:
+      - "5444:5432"  # Expose port 5432 from container to host
+    volumes:
+      - pgdata:/var/lib/postgresql/data  # Persist data even if the container is recreated
+    networks:
+      - app-network
+
+volumes:
+  pgdata:  # Define a named volume to store the PostgreSQL data
+
+networks:
+  app-network:
+    driver: bridge

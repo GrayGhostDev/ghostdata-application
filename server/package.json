@@ -1,6 +1,7 @@
 {
   "name": "gray-ghost-data-backend",
   "version": "1.0.0",
+  "main": "index.js",
   "private": true,
   "scripts": {
     "start": "node index.js",
@@ -9,8 +10,19 @@
     "lint": "eslint . --ext js,ts"
   },
   "dependencies": {
+    "axios": "^1.7.2",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "ethers": "^6.13.0",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.3.1",
+    "express-validator": "^7.1.0",
+    "pg": "^8.12.0",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.3",
+    "sqlite3": "^5.1.7",
+    "winston": "^3.13.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.7",
@@ -23,5 +35,8 @@
   "jest": {
     "preset": "ts-jest",
     "testEnvironment": "node"
+  },
+  "engines": {
+    "node": ">=14.0.0"
   }
 }

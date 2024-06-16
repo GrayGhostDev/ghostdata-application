@@ -1,77 +1,87 @@
-// src/components/LoanDiskForm.tsx
 import React, { useState, FormEvent } from "react";
-import { useTransactions } from "../context/TransactionContext";
-import { Input } from ".";
+import { useTransactions } from "../hooks/useTransactions";
+import Input from "./Input";
 import { toast } from "react-toastify";
-import { useContractRead } from "@thirdweb-dev/react";
-import { contractAddress, contractABI } from "../utils/constants";
+import useLoanDiskApi from "../hooks/useLoanDiskApi";
 
 const LoanDiskForm: React.FC = () => {
-    const [formData, setFormData] = useState({
-        loanDiskAccountId: "",
-    });
-    const { fetchSavingTransactions, isLoading, ethTransactions } = useTransactions();
+  const [formData, setFormData] = useState({
+    email: "",
+    borrowerId: "",
+    amount: "",
+  });
+  const { fetchSavingTransactions, isLoading } = useTransactions();
+  const {
+    borrowerData,
+    isLoading: borrowerLoading,
+    fetchBorrowerData,
+  } = useLoanDiskApi();
 
-    // Read Transactions from smart contract
-    const { data: rawEthTransactions, isLoading: ethTxLoading } = useContractRead(
-        contractAddress,
-        contractABI,
-        "transactions",
-        [0] // Assuming you want to fetch the first transaction initially
-    );
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    };
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    await fetchBorrowerData(formData.email);
+  };
 
-    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
+  const handleEthWithdrawal = async () => {
+    try {
+      const amount = formData.amount; // Get the amount from form data
+      // Call the smart contract function for ETH withdrawal
+      // Add the necessary logic for interacting with the smart contract
+    } catch (error) {
+      console.error("Error initiating ETH withdrawal:", error);
+      toast.error("Failed to initiate ETH withdrawal. Please try again.");
+    }
+  };
 
-        try {
-            await fetchSavingTransactions(formData.loanDiskAccountId); // Fetch transactions
-            // (Optional) You can display a success message here or in the parent component
-        } catch (error) {
-            console.error("Error fetching LoanDisk transactions:", error);
-            toast.error("Failed to fetch LoanDisk transactions. Please try again."); // Display error toast
-        }
-    };
-
-    return (
-        <div className="flex flex-col md:p-12 py-12 px-4">
-            <h3 className="text-white text-3xl text-center my-2">Latest Ethereum Contract Transactions</h3>
-            {ethTxLoading ? (
-              <Loader />
-            ) : rawEthTransactions?.length > 0 ? (
-              <div className="flex flex-wrap justify-center items-center mt-10">
-                {(rawEthTransactions as any[]).map((transaction: any) => {
-                  return <div>
-                              <p className="text-white text-base">Txn ID: {transaction[0].toNumber()}</p>
-                              <p className="text-white text-base">Amount: {transaction[1].toNumber()}</p>
-                              <p className="text-white text-base">Transaction Type: {transaction[2]}</p>
-                          </div>
-                })}
-              </div>
-            ) : (
-              <p className="text-white text-center">No transactions to display.</p>
-            )}
-            <form onSubmit={handleSubmit} className="flex flex-col items-center">
-                <Input
-                    placeholder="LoanDisk Account ID"
-                    name="loanDiskAccountId"
-                    type="text"
-                    value={formData.loanDiskAccountId}
-                    handleChange={handleChange}
-                />
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-[#3d4f7c] rounded-full cursor-pointer"
-                >
-                    {isLoading ? "Fetching..." : "View LoanDisk Transactions"}
-                </button>
-            </form>
+  return (
+    <div className="flex flex-col md:p-12 py-12 px-4">
+      <h3 className="text-white text-3xl text-center my-2">
+        LoanDisk Transactions
+      </h3>
+      <form onSubmit={handleSubmit} className="flex flex-col items-center">
+        <Input
+          placeholder="Email"
+          name="email"
+          type="email"
+          value={formData.email}
+          handleChange={handleChange}
+        />
+        <button
+          type="submit"
+          disabled={borrowerLoading}
+          className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-[#3d4f7c] rounded-full cursor-pointer"
+        >
+          {borrowerLoading ? "Fetching..." : "Fetch Borrower Data"}
+        </button>
+      </form>
+      {borrowerData && (
+        <div className="text-white">
+          <p>Borrower ID: {borrowerData.borrower_id}</p>
+          <p>Business Name: {borrowerData.borrower_business_name}</p>
+          <form className="flex flex-col items-center">
+            <Input
+              placeholder="Amount to Withdraw"
+              name="amount"
+              type="number"
+              value={formData.amount}
+              handleChange={handleChange}
+            />
+            <button
+              type="button"
+              onClick={handleEthWithdrawal}
+              className="text-white w-full mt-2 border-[1px] p-2 border-[#3d4f7c] hover:bg-[#3d4f7c] rounded-full cursor-pointer"
+            >
+              Initiate ETH Withdrawal
+            </button>
+          </form>
         </div>
-    );
+      )}
+    </div>
+  );
 };
 
 export default LoanDiskForm;

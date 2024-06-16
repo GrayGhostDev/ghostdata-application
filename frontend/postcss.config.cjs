@@ -1,17 +1,16 @@
-module.exports = {
+/** @type {import('postcss-load-config').Config} */
+const config = {
   plugins: {
-    "tailwindcss": {},
-    "postcss-import": {},
-    "postcss-nested": {},
-    "postcss-preset-env": {
+    'postcss-import': {},
+    'tailwindcss': {},
+    'autoprefixer': {},
+    'postcss-preset-env': {
       stage: 1,
-      features: {
-        "nesting-rules": true,
-      },
       autoprefixer: {
         flexbox: "no-2009",
       },
     },
-    autoprefixer: {},
   },
 };
+
+module.exports = config;

@@ -3,8 +3,8 @@ import { HiMenuAlt4 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
 import { useAddress, ConnectWallet } from "@thirdweb-dev/react";
 import { Link } from "react-router-dom";
-import { shortenAddress } from "../utils/shortenAddress";
-import logo from "../../images/favicon.png";
+import shortenAddress from "../utils/shortenAddress";
+import Logo from "../../src/assets/GGDataMan.svg";
 
 interface NavBarItemProps {
   title: string;
@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
   return (
     <nav className="w-full flex md:justify-center justify-between items-center p-4 gradient-bg-navbar">
       <div className="md:flex-[0.5] flex-initial justify-center items-center">
-        <img src={logo} alt="logo" className="w-32 cursor-pointer" />
+        <img src={Logo} alt="logo" className="w-32 cursor-pointer" />
       </div>
       <ul className="text-white md:flex hidden list-none flex-row justify-between items-center flex-initial">
         {["Market", "Exchange", "Web3", "Wallets"].map((item, index) => (
@@ -64,7 +64,11 @@ const Navbar: React.FC = () => {
               <AiOutlineClose onClick={() => setToggleMenu(false)} />
             </li>
             {["Market", "Exchange", "Web3", "Wallets"].map((item, index) => (
-              <NavBarItem key={item + index} title={item} classprops="my-2 text-lg" />
+              <NavBarItem
+                key={item + index}
+                title={item}
+                classprops="my-2 text-lg"
+              />
             ))}
             {address ? (
               <li className="bg-[#2952e3] py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-[#2546bd] flex items-center">

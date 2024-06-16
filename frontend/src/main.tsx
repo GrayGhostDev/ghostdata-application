@@ -1,25 +1,26 @@
 // src/main.tsx
-import React from "react";
-import ReactDOM from "react-dom/client";
-import App from "./App";
-import { ThirdwebProvider } from "@thirdweb-dev/react";
-import { ACTIVE_CHAIN_ID } from "./utils/constants";
-import { TransactionsProvider } from "./context/TransactionsContext";
+import 'bootstrap/dist/css/bootstrap.min.css';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { ThirdwebProvider } from '@thirdweb-dev/react';
+import { ACTIVE_CHAIN_ID } from './utils/constants';
+import { TransactionsProvider } from './context/TransactionsContext';
+import App from './App';
+import ToastConfig from './ToastConfig';
+import './styles/tailwind.css';
 
-import "./index.css";
-import "react-toastify/dist/ReactToastify.css";
+import 'react-toastify/dist/ReactToastify.css';
 
-// Find the root element to render your React app
-const rootElement = document.getElementById("root");
+const rootElement = document.getElementById('root');
 
 if (rootElement) {
   const root = ReactDOM.createRoot(rootElement);
-
   root.render(
     <React.StrictMode>
       <ThirdwebProvider activeChain={ACTIVE_CHAIN_ID}>
         <TransactionsProvider>
           <App />
+          <ToastConfig />
         </TransactionsProvider>
       </ThirdwebProvider>
     </React.StrictMode>

@@ -15,12 +15,19 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "baseUrl": "./",
-    "allowImportingTsExtensions": true,
     "paths": {
-      "@/*": ["src/*"] // Optional alias for cleaner imports
-    }
+      "@/*": ["src/*"]
+    },
+    "noEmit": false,
+    "outDir": "./dist"
   },
-  "include": ["src",
-    "frontend/vite.config.ts"
+  "include": ["src/**/*", "vite.config.ts"],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "frontend/node_modules",
+    "frontend/dist",
+    "frontend/build"
   ]
 }

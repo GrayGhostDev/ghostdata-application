@@ -1,116 +1,191 @@
-// src/components/TransactionsProvider.tsx
-import React, { createContext, useState, useEffect, ReactNode, useContext } from "react";
-import { ethers } from "ethers";
-import { useSigner, useContractRead, useAccount, useContractWrite } from "@thirdweb-dev/react";
-import { contractAddress, contractABI, LOAN_DISK_ENDPOINTS } from "../utils/constants";
-import { LoanDiskTransaction } from "./TransactionsContext";
-import { readContract, getContractEvents } from "thirdweb";
-import { ThirdwebSDK } from "@thirdweb-dev/sdk";
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  ReactNode,
+} from "react";
+import { ethers, Contract } from "ethers";
+import { useSigner, useAccounts } from "@thirdweb-dev/react";
+import { contractABI, contractAddress } from "@/utils/constants";
+
+enum TransactionType {
+  DEPOSIT = "deposit",
+  WITHDRAW = "withdraw",
+}
+
+export interface LoanDiskTransaction {
+  transaction_id: string;
+  borrower_id: string;
+  transaction_date: string;
+  transaction_type_id: number;
+  transaction_amount: number;
+  transaction_description?: string;
+  transaction_balance?: number;
+}
+
+interface EthereumTransaction extends ethers.providers.TransactionReceipt {
+  // You can extend this with additional properties if needed
+}
+
+interface TransactionsContextType {
+  ethTransactions: EthereumTransaction[];
+  loanDiskTransactions: LoanDiskTransaction[];
+  addEthTransaction: (tx: EthereumTransaction) => void;
+  fetchLoanDiskTransactions: () => Promise<void>;
+  connectWallet: () => void;
+  isLoading: boolean;
+  transactionStatus: string | null;
+  transactionError: Error | null;
+  fetchTransactions: () => Promise<void>;
+  recordTransaction: (
+    amount: string,
+    transactionType: TransactionType
+  ) => Promise<void>;
+  createEthereumContract: () => Contract;
+}
+
+const TransactionContext = createContext<TransactionsContextType | undefined>(
+  undefined
+);
 
 interface TransactionsProviderProps {
   children: ReactNode;
 }
 
-interface TransactionsContextType {
-  ethTransactions: ethers.providers.TransactionReceipt[];
-  loanDiskTransactions: LoanDiskTransaction[];
-  isLoading: boolean;
-  fetchLoanDiskTransactions: (loanDiskAccountId: string) => Promise<void>;
-  createEthereumContract: () => ethers.Contract;
-  connectWallet: () => Promise<void>;
-}
-
-const TransactionContext = createContext<TransactionsContextType | undefined>(undefined);
-
-export function useTransactions() {
-  const context = useContext(TransactionContext);
-  if (!context) {
-    throw new Error("useTransactions must be used within a TransactionsProvider");
-  }
-  return context;
-}
-
-export function TransactionsProvider({ children }: TransactionsProviderProps) {
+// Mark the props as read-only
+export function TransactionsProvider({
+  children,
+}: Readonly<TransactionsProviderProps>) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [savingTransactions, setSavingTransactions] = useState<LoanDiskTransaction[]>([]);
-  const [ethTransactions, setEthTransactions] = useState<ethers.providers.TransactionReceipt[]>([]);
-  const address = useAccount()?.address;
+  const [transactions, setTransactions] = useState<LoanDiskTransaction[]>([]);
+  const [ethTransactions, setEthTransactions] = useState<EthereumTransaction[]>(
+    []
+  );
+  const [transactionStatus, setTransactionStatus] = useState<string | null>(
+    null
+  );
+  const [transactionError, setTransactionError] = useState<Error | null>(null);
   const signer = useSigner();
 
-  // Read Transactions from smart contract
-  const { data: rawEthTransactions, isLoading: ethTxLoading } = useContractRead(
-    contractAddress,
-    contractABI,
-    "transactions",
-    [0] // Assuming you want to fetch the first transaction initially
-  );
-
-  // convert transactions data to correct type
-  useEffect(() => {
-    if (rawEthTransactions) {
-      const _ethTransactions = (rawEthTransactions as any[]).map(
-        (transaction: any) => ({
-          transactionId: transaction[0].toNumber(),
-          amount: transaction[1].toNumber(),
-          transactionType: transaction[2],
-        })
-      );
-      setEthTransactions(_ethTransactions);
-    }
-  }, [rawEthTransactions]);
-
-  // Helper function to create a new Ethereum contract instance
-  const createEthereumContract = () => {
-    if (signer) {
-      return new ethers.Contract(contractAddress, contractABI, signer);
-    } else {
+  const createEthereumContract = useCallback((): Contract => {
+    if (!signer) {
       throw new Error("Signer not available");
     }
-  };
+    return new Contract(contractAddress, contractABI, signer);
+  }, [signer]);
 
-  const connectWallet = async () => {
-    // ... wallet connection logic if needed ...
-  };
-
-  const fetchSavingTransactions = async (loanDiskAccountId: string) => {
-    setIsLoading(true);
+  const fetchTransactions = useCallback(async (): Promise<void> => {
     try {
-      const response = await fetch(
-        `/api/loandisk/transactions?userAddress=${address}&chainId=${11155111}&loanDiskAccountId=${loanDiskAccountId}`,
-        { method: "GET" }
-      );
-      if (response.ok) {
-        const data = await response.json();
-        setSavingTransactions(data.transactions || []);
-      } else {
-        const error = await response.text();
-        console.error("Error fetching LoanDisk transactions:", error);
+      const borrowerId = "YOUR_BORROWER_ID"; // Replace with the actual borrower ID
+      const apiResponse = process.env.REACT_APP_LOANDISK_RESPONSE;
+      const authCode = process.env.REACT_APP_LOANDISK_AUTH_CODE;
+
+      if (!apiResponse || !authCode) {
+        throw new Error(
+          "API response URL or auth code is not defined in environment variables"
+        );
       }
+
+      const response = await fetch(
+        `${apiResponse}/saving_transaction/borrower/${borrowerId}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${authCode}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error(`HTTP error! status: ${response.status}`);
+        return;
+      }
+
+      const data: LoanDiskTransaction[] = await response.json();
+      setTransactions(data);
     } catch (error) {
       console.error("Error fetching LoanDisk transactions:", error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  }, []);
+
+  const recordTransaction = useCallback(
+    async (amount: string, transactionType: TransactionType) => {
+      try {
+        if (!signer) return;
+        setIsLoading(true);
+        const contract = createEthereumContract();
+        const transaction = await contract.recordTransaction(
+          amount,
+          transactionType
+        );
+        setTransactionStatus("pending");
+
+        const receipt: EthereumTransaction = await transaction.wait();
+        setTransactionStatus("success");
+        setEthTransactions((prevTransactions) => [
+          ...prevTransactions,
+          receipt,
+        ]);
+        await fetchTransactions();
+      } catch (error) {
+        console.error("Error recording transaction:", error);
+        setTransactionStatus("error");
+        setTransactionError(error as Error);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [signer, createEthereumContract, fetchTransactions]
+  );
+
+  const addEthTransaction = useCallback((tx: EthereumTransaction) => {
+    setEthTransactions((prevTransactions) => [...prevTransactions, tx]);
+  }, []);
+
+  const fetchLoanDiskTransactions = useCallback(async () => {
+    setIsLoading(true);
+    await fetchTransactions();
+    setIsLoading(false);
+  }, [fetchTransactions]);
 
   useEffect(() => {
-    if (address) {
-      // Fetch transactions when the user's address is available
-      fetchSavingTransactions(address); // Assuming LoanDisk Account ID is the same as the user's address
-    }
-  }, [address]);
+    fetchLoanDiskTransactions().then((r) => r);
+  }, [fetchLoanDiskTransactions]);
 
-  // Wrap the context value in useMemo for optimization
-  const contextValue = React.useMemo(
+  const connectWallet = useCallback(async () => {
+    // Implement wallet connection logic if needed
+  }, []);
+
+  const contextValue = useMemo(
     () => ({
       ethTransactions,
-      savingTransactions,
+      loanDiskTransactions: transactions,
+      addEthTransaction,
+      fetchLoanDiskTransactions,
       connectWallet,
-      isLoading: isLoading || ethTxLoading,
-      fetchSavingTransactions,
+      isLoading,
+      transactionStatus,
+      transactionError,
+      fetchTransactions,
+      recordTransaction,
       createEthereumContract,
     }),
-    [ethTransactions, savingTransactions, isLoading, ethTxLoading]
+    [
+      ethTransactions,
+      transactions,
+      addEthTransaction,
+      fetchLoanDiskTransactions,
+      connectWallet,
+      isLoading,
+      transactionStatus,
+      transactionError,
+      fetchTransactions,
+      recordTransaction,
+      createEthereumContract,
+    ]
   );
 
   return (
@@ -119,3 +194,6 @@ export function TransactionsProvider({ children }: TransactionsProviderProps) {
     </TransactionContext.Provider>
   );
 }
+
+export { TransactionContext, TransactionType };
+export type { EthereumTransaction, TransactionsContextType };

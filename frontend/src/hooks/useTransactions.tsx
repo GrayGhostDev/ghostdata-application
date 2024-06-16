@@ -1,63 +1,131 @@
-import { useState, useCallback, useEffect } from "react";
+// /frontend/src/hooks/useTransactions.tsx
+
+import {
+  useState,
+  useEffect,
+  useContext,
+  createContext,
+  ReactNode,
+} from "react";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
-import { useContractWrite, useWatchTransactions } from "@thirdweb-dev/react";
-import { contractAddress, contractABI } from "../utils/constants";
+import { contractABI, contractAddress } from "../utils/constants";
 
-interface TransactionParams {
-  to: string;
-  value: string;
-  data?: string;
+export interface LoanDiskTransaction {
+  transaction_id: string;
+  borrower_id: string;
+  transaction_date: string;
+  transaction_type_id: number;
+  transaction_amount: number;
+  transaction_description?: string;
+  transaction_balance?: number;
 }
 
-function useTransaction() {
-  const [txHash, setTxHash] = useState<string | undefined>(undefined);
-  const [error, setError] = useState<Error | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+interface TransactionsContextType {
+  ethTransactions: TransactionReceipt[];
+  loanDiskTransactions: LoanDiskTransaction[];
+  fetchSavingTransactions: (accountId: string) => Promise<void>;
+  isLoading: boolean;
+  connectWallet: () => Promise<void>;
+  currentAccount: string | null;
+  recordTransaction: (
+    amount: string,
+    to: string,
+    message: string
+  ) => Promise<void>;
+}
 
-  const { mutateAsync: sendTransaction, data: txResponse } = useContractWrite(
-    contractAddress,
-    contractABI as ethers.ContractInterface,
-    "recordTransaction"
+interface TransactionsProviderProps {
+  children: ReactNode;
+}
+
+const TransactionsContext = createContext<TransactionsContextType | undefined>(
+  undefined
+);
+
+export const useTransactions = () => {
+  const context = useContext(TransactionsContext);
+  if (!context) {
+    throw new Error(
+      "useTransactions must be used within a TransactionsProvider"
+    );
+  }
+  return context;
+};
+
+export const TransactionsProvider: React.FC<TransactionsProviderProps> = ({
+  children,
+}) => {
+  const [ethTransactions, setEthTransactions] = useState<TransactionReceipt[]>(
+    []
   );
+  const [loanDiskTransactions, setLoanDiskTransactions] = useState<
+    LoanDiskTransaction[]
+  >([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [currentAccount, setCurrentAccount] = useState<string | null>(null);
 
-  const { status, error: txError } = useWatchTransactions({
-    hash: txResponse?.receipt.transactionHash,
-  });
-
-  const handleSendTransaction = useCallback(
-    async ({ to, value, data }: TransactionParams) => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const parsedValue = ethers.utils.parseEther(value);
-
-        const result = await sendTransaction({
-          args: [to, parsedValue, data],
-        });
-        setTxHash(result.receipt.transactionHash);
-      } catch (err) {
-        setError(err as Error);
-        console.error("Transaction failed:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [sendTransaction]
-  );
-
-  useEffect(() => {
-    if (txError) {
-      setError(txError);
-    }
-  }, [txError]);
-
-  return {
-    sendTransaction: handleSendTransaction,
-    txHash,
-    error,
-    isLoading: isLoading || status === "loading",
+  const fetchSavingTransactions = async (accountId: string) => {
+    setIsLoading(true);
+    // Fetch LoanDisk transactions logic here
+    setIsLoading(false);
   };
-}
+
+  const connectWallet = async () => {
+    if (!window.ethereum) {
+      alert("Please install MetaMask!");
+      return;
+    }
+
+    try {
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.error("Failed to connect wallet:", error);
+    }
+  };
+
+  const recordTransaction = async (
+    amount: string,
+    to: string,
+    message: string
+  ) => {
+    if (!currentAccount || !window.ethereum) return;
+
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+    try {
+      const transaction = await contract.recordTransaction(
+        ethers.utils.parseEther(amount),
+        to,
+        message
+      );
+      const receipt: TransactionReceipt = await transaction.wait();
+      setEthTransactions((prev) => [...prev, receipt]);
+    } catch (error) {
+      console.error("Transaction failed:", error);
+    }
+  };
+
+  return (
+    <TransactionsContext.Provider
+      value={{
+        ethTransactions,
+        loanDiskTransactions,
+        fetchSavingTransactions,
+        isLoading,
+        connectWallet,
+        currentAccount,
+        recordTransaction,
+      }}
+    >
+      {children}
+    </TransactionsContext.Provider>
+  );
+};
 
 export default useTransactions;

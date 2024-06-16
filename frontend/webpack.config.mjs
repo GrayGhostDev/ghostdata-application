@@ -1,10 +1,18 @@
 import path from 'path';
+import { fileURLToPath } from 'url';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
+import webpack from 'webpack';
+
+console.log("Before resolving __filename and __dirname"); // Log 1
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+console.log("__filename:", __filename); // Log 2
+console.log("__dirname:", __dirname);  // Log 3
 
 export default {
-  mode: process.env.NODE_ENV || 'development',
+  mode: process.env.NODE_ENV || 'production',
   entry: './src/main.tsx',
   output: {
     filename: 'main.[contenthash].js',
@@ -16,6 +24,12 @@ export default {
     alias: {
       '@': path.resolve(__dirname, 'src'),
     },
+    fallback: {
+      stream: 'stream-browserify',
+      http: 'stream-http',
+      https: 'https-browserify',
+      zlib: 'browserify-zlib',
+    }
   },
   module: {
     rules: [
@@ -27,9 +41,7 @@ export default {
       {
         test: /\.css$/i,
         use: [
-          process.env.NODE_ENV !== 'production'
-            ? 'style-loader'
-            : MiniCssExtractPlugin.loader,
+          MiniCssExtractPlugin.loader,
           'css-loader',
           'postcss-loader',
         ],
@@ -43,11 +55,14 @@ export default {
   plugins: [
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      template: './src/index.html',
-      favicon: './public/favicon.ico',
+      template: './public/index.html',
+      favicon: './public/Image/GGDataMan.svg',
     }),
     new MiniCssExtractPlugin({
       filename: '[name].[contenthash].css',
+    }),
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
     }),
   ],
   devServer: {

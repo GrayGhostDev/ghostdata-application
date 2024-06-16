@@ -1,29 +1,21 @@
-// src/components/Transactions.tsx
-import React from "react";
-import { TransactionReceipt } from "@ethersproject/abstract-provider"; // Correct import
-import { LoanDiskTransaction, useTransactions } from "./context/TransactionContext"; // Correct import
-import useFetch from "../hooks/useFetch";
-import { shortenAddress } from "../utils/shortenAddress";
-import { ACTIVE_CHAIN_ID, NETWORKS } from "../utils/constants";
-import Loader from "./Loader"; // Import your Loader component
+// /frontend/src/components/Transactions.tsx
 
-// ... (Your interface and TransactionCard component)
+import React from "react";
+import { TransactionReceipt } from "@ethersproject/abstract-provider";
+import { useTransactions } from "@/hooks/useTransactions";
+import { LoanDiskTransaction } from "@/context/TransactionsContext"; // Correct import
+import Loader from "./Loader";
+import TransactionsCard from "@/components/TransactionsCard"; // Import your Loader component
 
 const Transactions: React.FC = () => {
-  const { ethTransactions, loandiskTransactions, isLoading } =
+  const { ethTransactions, loanDiskTransactions, isLoading } =
     useTransactions();
 
   // Combine transactions
   const allTransactions: (TransactionReceipt | LoanDiskTransaction)[] = [
     ...ethTransactions,
-    ...loandiskTransactions,
+    ...loanDiskTransactions,
   ];
-
-  export const network = NETWORKS[ACTIVE_CHAIN_ID];
-  const explorerUrl =
-    network.chainId === 1
-      ? "https://etherscan.io/"
-      : "https://sepolia.etherscan.io/";
 
   return (
     <div className="flex w-full justify-center items-center 2xl:px-20 gradient-bg-transactions">
@@ -43,20 +35,34 @@ const Transactions: React.FC = () => {
                 return (
                   <TransactionsCard
                     key={i}
-                    addressTo={ethTx.to}
-                    addressFrom={ethTx.from}
+                    addressTo={ethTx.to ?? ""}
+                    addressFrom={ethTx.from ?? ""}
                     timestamp={new Date(
                       ethTx.blockNumber * 1000
                     ).toLocaleString()}
                     message="" // Add message logic if available
                     keyword="ETH"
-                    amount={ethTx.value.toString()}
+                    amount={ethTx.effectiveGasPrice?.toString() ?? "0"} // Change this line
                     transactionHash={ethTx.transactionHash}
                   />
                 );
               } else {
                 // It's a LoanDisk transaction
-                return <TransactionsCard key={i} {...transaction} />;
+                const loanDiskTx = transaction as LoanDiskTransaction;
+                return (
+                  <TransactionsCard
+                    key={i}
+                    addressTo={loanDiskTx.borrower_id}
+                    addressFrom="LoanDisk"
+                    timestamp={new Date(
+                      loanDiskTx.transaction_date
+                    ).toLocaleString()}
+                    message={loanDiskTx.transaction_description || ""}
+                    keyword="LOAN"
+                    amount={loanDiskTx.transaction_amount.toString()}
+                    transactionHash={loanDiskTx.transaction_id}
+                  />
+                );
               }
             })}
           </div>
