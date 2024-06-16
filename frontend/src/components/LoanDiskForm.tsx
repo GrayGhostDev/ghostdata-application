@@ -1,21 +1,20 @@
+// src/components/LoanDiskForm.tsx
 import React, { useState, FormEvent } from "react";
 import { useTransactions } from "../hooks/useTransactions";
 import Input from "./Input";
 import { toast } from "react-toastify";
 import useLoanDiskApi from "../hooks/useLoanDiskApi";
+import { ethers } from "ethers";
+import { contractABI, contractAddress } from "../utils/constants";
 
 const LoanDiskForm: React.FC = () => {
   const [formData, setFormData] = useState({
-    email: "",
-    borrowerId: "",
-    amount: "",
+    email: "email@email.com",
+    borrowerId: "1234567",
+    amount: "23,2333.23",
   });
   const { fetchSavingTransactions, isLoading } = useTransactions();
-  const {
-    borrowerData,
-    isLoading: borrowerLoading,
-    fetchBorrowerData,
-  } = useLoanDiskApi();
+  const { borrowerData, isLoading: borrowerLoading, fetchBorrowerData } = useLoanDiskApi();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -23,14 +22,29 @@ const LoanDiskForm: React.FC = () => {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    await fetchBorrowerData(formData.email);
+    await fetchBorrowerData(formData.email || "");
   };
 
   const handleEthWithdrawal = async () => {
+    if (!formData.amount) {
+      toast.error("Please enter an amount to withdraw.");
+      return;
+    }
+
     try {
-      const amount = formData.amount; // Get the amount from form data
-      // Call the smart contract function for ETH withdrawal
-      // Add the necessary logic for interacting with the smart contract
+      if (!window.ethereum) {
+        alert("Please install MetaMask!");
+        return;
+      }
+
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, contractABI, signer);
+
+      const transaction = await contract.withdrawETH(ethers.utils.parseEther(formData.amount));
+      await transaction.wait();
+
+      toast.success("Withdrawal successful!");
     } catch (error) {
       console.error("Error initiating ETH withdrawal:", error);
       toast.error("Failed to initiate ETH withdrawal. Please try again.");
@@ -39,9 +53,7 @@ const LoanDiskForm: React.FC = () => {
 
   return (
     <div className="flex flex-col md:p-12 py-12 px-4">
-      <h3 className="text-white text-3xl text-center my-2">
-        LoanDisk Transactions
-      </h3>
+      <h3 className="text-white text-3xl text-center my-2">LoanDisk Transactions</h3>
       <form onSubmit={handleSubmit} className="flex flex-col items-center">
         <Input
           placeholder="Email"

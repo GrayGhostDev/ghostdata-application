@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { HiMenuAlt4 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
-import ConnectWalletButton  from "./ConnectWalletButton";
-import useAddress  from "../hooks/useAddress";
+import ConnectWalletButton from "./ConnectWalletButton";
+import useAddress from "../hooks/useAddress";
 import { Link } from "react-router-dom";
 import shortenAddress from "../utils/shortenAddress";
 import Logo from "../../src/assets/GGDataMan.svg";
@@ -21,7 +21,7 @@ const NavBarItem: React.FC<NavBarItemProps> = ({ title, path, classprops }) => (
 
 const Navbar: React.FC = () => {
   const [toggleMenu, setToggleMenu] = useState(false);
-  const address = useAddress();
+  const { address } = useAddress();
 
   const navItems: NavBarItemProps[] = [
     { title: "Home", path: "/" },
@@ -44,8 +44,8 @@ const Navbar: React.FC = () => {
         <img src={Logo} alt="logo" className="w-32 cursor-pointer" />
       </div>
       <ul className="text-white md:flex hidden list-none flex-row justify-between items-center flex-initial">
-        {navItems.map((item, index) => (
-          <NavBarItem key={index} {...item} />
+        {navItems.map((item) => (
+          <NavBarItem key={item.title} {...item} />
         ))}
         {address ? (
           <li className="bg-[#2952e3] py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-[#2546bd] flex items-center">
@@ -80,8 +80,8 @@ const Navbar: React.FC = () => {
             <li className="text-xl w-full my-2">
               <AiOutlineClose onClick={() => setToggleMenu(false)} />
             </li>
-            {navItems.map((item, index) => (
-              <NavBarItem key={index} {...item} classprops="my-2 text-lg" />
+            {navItems.map((item) => (
+              <NavBarItem key={item.title} {...item} classprops="my-2 text-lg" />
             ))}
             {address ? (
               <li className="bg-[#2952e3] py-2 px-7 mx-4 rounded-full cursor-pointer hover:bg-[#2546bd] flex items-center">

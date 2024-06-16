@@ -48,7 +48,7 @@ const Services: React.FC = () => {
             Empower Your Transactions
           </h1>
           <p className="mt-4 text-base font-light text-white md:w-9/12">
-            Connect, transact, and innovate with our platform's integrations for
+            Connect, transact, and innovate with our platform integrations for
             Thirdweb and LoanDisk.
           </p>
         </div>

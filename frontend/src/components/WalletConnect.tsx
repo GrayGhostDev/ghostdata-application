@@ -1,7 +1,6 @@
 // src/components/WalletConnect.tsx
 import React from "react";
 import {
-  useConnect,
   ConnectWallet,
   Web3Button,
   useContract,
@@ -11,9 +10,7 @@ import { contractAddress } from "@/utils/constants";
 
 const WalletConnect: React.FC = () => {
   const address = useAddress();
-  const connect = useConnect();
   const { contract } = useContract(contractAddress);
-
   return (
     <div>
       {!address ? (

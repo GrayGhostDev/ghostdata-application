@@ -1,24 +1,32 @@
 import { ThirdwebSDK } from "@thirdweb-dev/sdk";
 import { ethers } from "ethers";
 import axios from "axios";
-import abi from "./Transactions.json";
-import Transactions from "./Transactions.json";
 
 // Configuring environment and network parameters
-const isProduction = process.env.NODE_ENV === "development";
+const isProduction = process.env.NODE_ENV === "production";
 
 // Smart Contract Details
 export const contractAddress = isProduction
-  ? (process.env.VITE_MAINNET_CONTRACT_ADDRESS) // Mainnet contract address
-  : (process.env.VITE_TESTNET_CONTRACT_ADDRESS); // Testnet contract address
+  ? (process.env.VITE_MAINNET_CONTRACT_ADDRESS as string) // Mainnet contract address
+  : (process.env.VITE_TESTNET_CONTRACT_ADDRESS as string); // Testnet contract address
 
-export const contractABI = Transactions.abi;
+export const contractABI = [
+  {
+    constant: false,
+    inputs: [{ name: "_amount", type: "uint256" }],
+    name: "withdrawETH",
+    outputs: [],
+    payable: true,
+    stateMutability: "payable",
+    type: "function",
+  },
+];
 
 // LoanDisk API Details
 export const loandiskAPIBaseURL = "https://api-main.loandisk.com";
-export const loandiskPublicKey = process.env.VITE_LOANDISK_PUBLIC_KEY;
-export const loandiskBranchId = process.env.VITE_LOANDISK_BRANCH_ID;
-export const loandiskAuthCode = process.env.VITE_LOANDISK_AUTH_CODE;
+export const loandiskPublicKey = process.env.VITE_LOANDISK_PUBLIC_KEY as string;
+export const loandiskBranchId = process.env.VITE_LOANDISK_BRANCH_ID as string;
+export const loandiskAuthCode = process.env.VITE_LOANDISK_AUTH_CODE as string;
 
 // Setting up Ethereum Network Details dynamically
 export const NETWORKS = () => {
@@ -53,7 +61,7 @@ export const loandiskAPI = axios.create({
   baseURL: `${loandiskAPIBaseURL}/${loandiskPublicKey}/${loandiskBranchId}`,
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Basic ${Buffer.from(`${loandiskAuthCode}`).toString("base64")}`,
+    Authorization: `Basic ${Buffer.from(loandiskAuthCode).toString("base64")}`,
   },
 });
 
@@ -61,11 +69,9 @@ export const loandiskAPI = axios.create({
 loandiskAPI.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error(
-      "LoanDisk API Error:",
-      error.response ? error.response.data : error.message
-    );
-    return Promise.reject(error);
+    const errorMessage = error.response?.data ?? error.message;
+    console.error("LoanDisk API Error:", errorMessage);
+    return Promise.reject(new Error(errorMessage));
   }
 );
 

@@ -1,6 +1,6 @@
 import React from "react";
 import { FaGithub, FaLinkedin, FaTwitter } from "react-icons/fa";
-import logo from "/Image/logo/GGDataMan.svg"; // Update the import path
+import logo from "../../public/Image/GGDataMan.svg";
 
 const Footer: React.FC = () => {
   return (
@@ -37,7 +37,7 @@ const Footer: React.FC = () => {
       <div className="sm:w-[90%] w-full h-[0.25px] bg-gray-400 mt-5 " />
 
       <div className="sm:w-[90%] w-full flex justify-between items-center mt-3">
-        <p className="text-white text-left text-xs">@GrayGhostKrypter2024</p>
+        <p className="text-white text-left text-xs">@GrayGhostDataMan2024</p>
         <p className="text-white text-right text-xs">All rights reserved</p>
       </div>
 
