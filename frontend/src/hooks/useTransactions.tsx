@@ -10,6 +10,7 @@ import {
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
 import { contractABI, contractAddress } from "../utils/constants";
+import axios from "axios";
 
 export interface LoanDiskTransaction {
   transaction_id: string;
@@ -33,6 +34,8 @@ interface TransactionsContextType {
     to: string,
     message: string
   ) => Promise<void>;
+  addTransaction: (transactionId: string, details: string) => void;
+  transactions: { transactionId: string; details: string }[];
 }
 
 interface TransactionsProviderProps {
@@ -64,11 +67,30 @@ export const TransactionsProvider: React.FC<TransactionsProviderProps> = ({
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [currentAccount, setCurrentAccount] = useState<string | null>(null);
+  const [transactions, setTransactions] = useState<
+    { transactionId: string; details: string }[]
+  >([]);
 
   const fetchSavingTransactions = async (accountId: string) => {
     setIsLoading(true);
-    // Fetch LoanDisk transactions logic here
-    setIsLoading(false);
+    try {
+      const response = await axios.get(
+        `https://api.loandisk.com/user/${accountId}/transactions`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${btoa(
+              `${process.env.VITE_LOANDISK_AUTH_CODE}`
+            )}`,
+          },
+        }
+      );
+      setLoanDiskTransactions(response.data);
+    } catch (error) {
+      console.error("Error fetching LoanDisk transactions:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const connectWallet = async () => {
@@ -111,6 +133,10 @@ export const TransactionsProvider: React.FC<TransactionsProviderProps> = ({
     }
   };
 
+  const addTransaction = (transactionId: string, details: string) => {
+    setTransactions([...transactions, { transactionId, details }]);
+  };
+
   return (
     <TransactionsContext.Provider
       value={{
@@ -121,6 +147,8 @@ export const TransactionsProvider: React.FC<TransactionsProviderProps> = ({
         connectWallet,
         currentAccount,
         recordTransaction,
+        addTransaction,
+        transactions,
       }}
     >
       {children}

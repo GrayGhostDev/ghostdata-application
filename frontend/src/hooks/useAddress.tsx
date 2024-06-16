@@ -1,36 +1,26 @@
-// src/hooks/useAddress.tsx
 import { useState, useEffect } from "react";
-import { useAddress as useThirdwebAddress, useThirdwebConnectedWalletContext } from "@thirdweb-dev/react";
-import useLoanDiskApi from "./useLoanDiskApi"
-import axios from "axios";
-
+import { useAddress as useThirdwebAddress } from "@thirdweb-dev/react";
+import useLoanDiskApi from "./useLoanDiskApi";
 
 const useAddress = () => {
-  const [loanDiskApiConnected, setLoanDiskApiConnected] = useState(false);
-  const [loanDiskData, setLoanDiskData] = useState(null);
-  const address = useThirdwebAddress();
-
+  const { borrowerData, isLoading, error, fetchBorrowerData } = useLoanDiskApi();
+  const [address, setAddress] = useState<string | null>(null);
+  const thirdwebAddress = useThirdwebAddress();
 
   useEffect(() => {
-    if (address) {
-      const loandiskAPI = useLoanDiskApi();
-      axios
-        .get(`https://api.loandisk.com/user/${address}`)
-        .then((response) => {
-          setLoanDiskData(response.data);
-          setLoanDiskApiConnected(true);
-        })
-        .catch((error) => {
-          console.error("Error connecting to LoanDisk API:", error);
-          setLoanDiskApiConnected(false);
-        });
+    if (thirdwebAddress) {
+      setAddress(thirdwebAddress);
+      fetchBorrowerData(thirdwebAddress);
+    } else {
+      setAddress(null);
     }
-  }, [address]);
+  }, [thirdwebAddress, fetchBorrowerData]);
 
   return {
     address,
-    loanDiskApiConnected,
-    loanDiskData,
+    borrowerData,
+    isLoading,
+    error,
   };
 };
 

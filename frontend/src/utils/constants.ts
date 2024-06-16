@@ -5,58 +5,55 @@ import abi from "./Transactions.json";
 import Transactions from "./Transactions.json";
 
 // Configuring environment and network parameters
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV === "development";
 
 // Smart Contract Details
 export const contractAddress = isProduction
-  ? (process.env.VITE_MAINNET_CONTRACT_ADDRESS as string) // Mainnet contract address
-  : (process.env.VITE_TESTNET_CONTRACT_ADDRESS as string);
-// Mumbai testnet contract address
+  ? (process.env.VITE_MAINNET_CONTRACT_ADDRESS) // Mainnet contract address
+  : (process.env.VITE_TESTNET_CONTRACT_ADDRESS); // Testnet contract address
 
 export const contractABI = Transactions.abi;
 
 // LoanDisk API Details
 export const loandiskAPIBaseURL = "https://api-main.loandisk.com";
-export const loandiskPublicKey = process.env.VITE_LOANDISK_PUBLIC_KEY as string;
-export const loandiskBranchId = process.env.VITE_LOANDISK_BRANCH_ID as string;
-export const loandiskAuthCode = process.env.VITE_LOANDISK_AUTH_CODE as string;
+export const loandiskPublicKey = process.env.VITE_LOANDISK_PUBLIC_KEY;
+export const loandiskBranchId = process.env.VITE_LOANDISK_BRANCH_ID;
+export const loandiskAuthCode = process.env.VITE_LOANDISK_AUTH_CODE;
 
 // Setting up Ethereum Network Details dynamically
 export const NETWORKS = () => {
   switch (process.env.NODE_ENV) {
     case "production":
-      return { network: "mainnet", chainId: 1 };
+      return { network: "Mainnet", chainId: 1 };
     case "development":
-      return { network: "sepolia", chainId: 11155111 }; // Sepolia testnet for development
+      return { network: "Sepolia", chainId: 11155111 }; // Sepolia testnet for development
     default:
       return { network: "rinkeby", chainId: 4 }; // Default to Rinkeby if not production or specific development setup
   }
 };
 
 const { network, chainId } = NETWORKS();
-const rpcURL = process.env[
-  `VITE_ALCHEMY_API_URL_${network.toUpperCase()}`
-] as string;
+const rpcURL = process.env[`VITE_ALCHEMY_API_URL_${network.toUpperCase()}`] as string;
 
 // Initialize Thirdweb SDK with an appropriate Ethereum provider
 export const sdk = new ThirdwebSDK(
   new ethers.providers.JsonRpcProvider(rpcURL, chainId)
 );
+
 export const contract = new ethers.Contract(
   contractAddress,
   contractABI,
   sdk.getSigner()
 );
-export const ACTIVE_CHAIN_ID = 1; // Mainnet chain ID
+
+export const ACTIVE_CHAIN_ID = isProduction ? 1 : 4; // Mainnet chain ID or Rinkeby chain ID
 
 // Configure Axios instance for LoanDisk API
 export const loandiskAPI = axios.create({
   baseURL: `${loandiskAPIBaseURL}/${loandiskPublicKey}/${loandiskBranchId}`,
   headers: {
     "Content-Type": "application/json",
-    Authorization: `Basic ${Buffer.from(`${loandiskAuthCode}`).toString(
-      "base64"
-    )}`,
+    Authorization: `Basic ${Buffer.from(`${loandiskAuthCode}`).toString("base64")}`,
   },
 });
 

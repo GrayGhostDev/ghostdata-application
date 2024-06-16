@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import * as path from "path";
 import svgr from "vite-plugin-svgr";
 import tsconfigPaths from "vite-tsconfig-paths";
+import dotenv from "dotenv";
 
 export default defineConfig({
   root: ".", // Set the root to the project root
@@ -32,7 +33,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "src"), // Use path.resolve for the alias
+      "@": path.resolve(__dirname, "src"),
     },
     extensions: [".tsx", ".ts", ".jsx", ".js"],
   },
@@ -48,7 +49,7 @@ export default defineConfig({
         "react",
         "react-dom",
         "react-router-dom",
-        "/Image/logo/GGDataMan.svg", // Ensure this matches your asset path
+        "./src/assets/GGDataMan.svg", // Ensure this matches your asset path
       ],
     },
   },
