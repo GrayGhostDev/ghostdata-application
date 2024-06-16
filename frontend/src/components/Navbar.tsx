@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { HiMenuAlt4 } from "react-icons/hi";
 import { AiOutlineClose } from "react-icons/ai";
-import { ConnectWalletButton } from "./ConnectWalletButton";
-import { useAddress } from "../hooks/useAddress";
+import ConnectWalletButton  from "./ConnectWalletButton";
+import useAddress  from "../hooks/useAddress";
 import { Link } from "react-router-dom";
 import shortenAddress from "../utils/shortenAddress";
 import Logo from "../../src/assets/GGDataMan.svg";

@@ -3,13 +3,18 @@ import React, { useState, FormEvent } from "react";
 import { useContract, useSigner } from "@thirdweb-dev/react";
 import { ConnectWallet } from "@thirdweb-dev/react";
 import { contractABI, contractAddress } from "@/utils/constants";
+import useContractFunction from "@/hooks/useContractFunction";
 
 interface TransferDetails {
   recipient: string;
   tokenId: string;
 }
 
+
 const AssetTransferForm: React.FC = () => {
+  const [amount, setAmount] = useState("");
+  const [toAddress, setToAddress] = useState("")
+  const { data, isLoading, error, callFunction } = useContractFunction("transferAsset");
   const [transferDetails, setTransferDetails] = useState<TransferDetails>({
     recipient: "",
     tokenId: "",
@@ -19,6 +24,7 @@ const AssetTransferForm: React.FC = () => {
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    await callFunction(toAddress, amount);
 
     if (!contract || !signer) return; // Check if contract and signer are defined
 
@@ -43,13 +49,15 @@ const AssetTransferForm: React.FC = () => {
         <input
           type="text"
           placeholder="Recipient Address"
-          value={transferDetails.recipient}
+          value={toAddress}
           onChange={(e) =>
-            setTransferDetails({
-              ...transferDetails,
-              recipient: e.target.value,
-            })
-          }
+            setToAddress(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Amount"
+          value={amount}
+          onChange={(e) => setAmount(e.target.value)}
         />
         <input
           type="text"
@@ -59,8 +67,19 @@ const AssetTransferForm: React.FC = () => {
             setTransferDetails({ ...transferDetails, tokenId: e.target.value })
           }
         />
-        <button type="submit">Transfer Asset</button>
+        <input
+          type="text"
+          placeholder="transfer details"
+          value={transferDetails.recipient}
+          onChange={(e) =>
+            setTransferDetails({...transferDetails, recipient: e.target.value })
+          }
+        />
+        <button type="submit" disabled={isLoading}>Transfer Asset</button>
       </form>
+      {isLoading && <p>Loading...</p>}
+      {error && <p>Error: {error.message}</p>}
+      {data && <p>Result: {JSON.stringify(data)}</p>}
     </div>
   );
 };

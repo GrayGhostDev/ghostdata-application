@@ -1,12 +1,4 @@
-// /frontend/src/hooks/useTransactions.tsx
-
-import {
-  useState,
-  useEffect,
-  useContext,
-  createContext,
-  ReactNode,
-} from "react";
+import React, { useState, useEffect, useContext, createContext, ReactNode } from "react";
 import { TransactionReceipt } from "@ethersproject/abstract-provider";
 import { ethers } from "ethers";
 import { contractABI, contractAddress } from "../utils/constants";
@@ -80,7 +72,7 @@ export const TransactionsProvider: React.FC<TransactionsProviderProps> = ({
           headers: {
             "Content-Type": "application/json",
             Authorization: `Basic ${btoa(
-              `${process.env.VITE_LOANDISK_AUTH_CODE}`
+              `${process.env.VITE_LOANDISK_AUTH_CODE ?? ""}`
             )}`,
           },
         }
@@ -136,6 +128,12 @@ export const TransactionsProvider: React.FC<TransactionsProviderProps> = ({
   const addTransaction = (transactionId: string, details: string) => {
     setTransactions([...transactions, { transactionId, details }]);
   };
+
+  useEffect(() => {
+    if (currentAccount) {
+      fetchSavingTransactions(currentAccount);
+    }
+  }, [currentAccount]);
 
   return (
     <TransactionsContext.Provider
