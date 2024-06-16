@@ -1,15 +1,14 @@
-// /frontend/thirdweb/inAppWallet.js
-import { inAppWallet as thirdwebInAppWallet } from "thirdweb/wallets";
+import { InAppWallet as thirdwebInAppWallet } from "thirdweb/wallets";
 import { Sepolia } from "thirdweb/chains";
 
-const wallet = thirdwebInAppWallet({
+const wallet = new thirdwebInAppWallet({
   smartAccount: {
     chain: Sepolia,
     sponsorGas: false,
   },
   metadata: {
     image: {
-      src: "../../Image/logo/GGDataMan.svg",
+      src: "../../Image/logo/GGDataMan.svg", // Ensure this path is correct
       alt: "My logo",
       width: 100,
       height: 100,
@@ -18,8 +17,8 @@ const wallet = thirdwebInAppWallet({
   },
 });
 
-wallet.createWallet = async () => {
-  const newWallet = await thirdwebInAppWallet.createWallet();
+wallet.createWallet = async function () {
+  const newWallet = await this.createWallet();
   return newWallet;
 };
 

@@ -14,8 +14,9 @@ export * from "./TransactionsProvider";
 export * from "./WalletConnect";
 export * from "./LoanDiskForm";
 export * from "./Input";
-export * from "./Dashboard";
+// export * from "./Dashboard";
 export * from "./ErrorBoundary";
-export * from "./Notifications";
-export * from "./UserProfile";
-export 
+// export * from "./Notifications";
+// export * from "./UserProfile";
+export * from "./createWallet";
+export * from "./WalletConnect";

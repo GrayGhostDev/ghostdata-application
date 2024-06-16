@@ -1,21 +1,38 @@
-// /frontend/src/components/CreateWallet.tsx
+import React, { useEffect, useState } from "react";
+import wallet from '../thirdweb/inAppWallet'; // Corrected import statement
 
-import React from "react";
-import wallet from "../thirdweb/inAppWallet"; // Adjust path as needed
+const CreateWallet: React.FC = () => {
+  const [isWalletInitialized, setIsWalletInitialized] = useState(false);
 
-export const CreateWallet: React.FC = () => {
+  useEffect(() => {
+    const initWallet = async () => {
+      setIsWalletInitialized(true);
+    };
+    initWallet();
+  }, []);
+
   const createWallet = async () => {
     try {
-      const newWallet = await wallet.createWallet();
-      console.log(newWallet);
+      if (wallet) {
+        const newWallet = await wallet.createWallet();
+        console.log(newWallet);
+      } else {
+        console.error("Wallet not initialized yet.");
+      }
     } catch (error) {
       console.error("Failed to create wallet:", error);
     }
   };
 
   return (
-    <div>
-      <button onClick={createWallet}>Create Wallet</button>
+    <div className="p-4">
+      <button
+        onClick={createWallet}
+        disabled={!isWalletInitialized}
+        className="bg-secondary-color text-text-primary p-2 rounded-lg shadow-primary hover:filter-brightness"
+      >
+        Create Wallet
+      </button>
     </div>
   );
 };

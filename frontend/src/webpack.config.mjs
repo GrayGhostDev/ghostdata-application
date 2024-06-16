@@ -5,14 +5,11 @@ import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
 import webpack from 'webpack';
 
-console.log("Before resolving __filename and __dirname"); // Log 1
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-console.log("__filename:", __filename); // Log 2
-console.log("__dirname:", __dirname);  // Log 3
 
 export default {
-  mode: process.env.NODE_ENV || 'production',
+  mode: process.env.NODE_ENV || 'development', // Use development mode by default
   entry: './src/main.tsx',
   output: {
     filename: 'main.[contenthash].js',
@@ -29,7 +26,7 @@ export default {
       http: 'stream-http',
       https: 'https-browserify',
       zlib: 'browserify-zlib',
-    }
+    },
   },
   module: {
     rules: [
@@ -69,8 +66,10 @@ export default {
     static: {
       directory: path.join(__dirname, 'dist'),
     },
-    port: 8080,
+    port: 5173, // Use the same port
     hot: true,
     historyApiFallback: true,
+    open: true, // Automatically open the browser
   },
+  devtool: 'source-map', // Enable source maps for development
 };
