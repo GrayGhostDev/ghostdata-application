@@ -27,7 +27,7 @@
     "webpack.config.ts",
     "tailwind.config.js",
     "postcss.config.cjs"
-  ],
+, "webpack.config.mjs"  ],
   "exclude": [
     "node_modules",
     "dist",

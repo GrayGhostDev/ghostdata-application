@@ -25,6 +25,7 @@
     "@thirdweb-dev/chains": "^0.1.118",
     "@thirdweb-dev/react": "^4.7.0",
     "@thirdweb-dev/tsconfig": "^0.1.7",
+    "@thirdweb-dev/react-native": "^0.8.0",
     "@usedapp/core": "^1.1.5",
     "browserify": "^17.0.0",
     "browserify-zlib": "^0.2.0",
